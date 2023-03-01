@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -10,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
 	golog "github.com/ipfs/go-log"
 	"gitlab.com/thorchain/binance-sdk/common/types"
 
@@ -26,6 +24,7 @@ var (
 	pretty     bool
 	baseFolder string
 	tssAddr    string
+	privKey    string
 )
 
 func main() {
@@ -46,14 +45,14 @@ func main() {
 	if os.Getenv("NET") == "testnet" || os.Getenv("NET") == "mocknet" {
 		types.Network = types.TestNetwork
 	}
-	// Read stdin for the private key
-	inBuf := bufio.NewReader(os.Stdin)
-	priKeyBytes, err := input.GetPassword("input node secret key:", inBuf)
-	if err != nil {
-		fmt.Printf("error in get the secret key: %s\n", err.Error())
-		return
-	}
-	priKey, err := conversion.GetPriKey(priKeyBytes)
+	// // Read stdin for the private key
+	// inBuf := bufio.NewReader(os.Stdin)
+	// // priKeyBytes, err := input.GetPassword("input node secret key:", inBuf)
+	// if err != nil {
+	// 	fmt.Printf("error in get the secret key: %s\n", err.Error())
+	// 	return
+	// }
+	priKey, err := conversion.GetPriKey(privKey)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,6 +87,7 @@ func main() {
 func parseFlags() (tssConf common.TssConfig, p2pConf p2p.Config) {
 	// we setup the configure for the general configuration
 	flag.StringVar(&tssAddr, "tss-port", "127.0.0.1:8080", "tss port")
+	flag.StringVar(&privKey, "priv-key", "127.0.0.1:8080", "tss port")
 	flag.BoolVar(&help, "h", false, "Display Help")
 	flag.StringVar(&logLevel, "loglevel", "info", "Log Level")
 	flag.BoolVar(&pretty, "pretty-log", false, "Enables unstructured prettified logging. This is useful for local debugging")

@@ -18,8 +18,8 @@ import (
 	tsslibcommon "github.com/binance-chain/tss-lib/common"
 	btss "github.com/binance-chain/tss-lib/tss"
 	"github.com/ipfs/go-log"
-	zlog "github.com/rs/zerolog/log"
 	maddr "github.com/multiformats/go-multiaddr"
+	zlog "github.com/rs/zerolog/log"
 
 	"gitlab.com/thorchain/tss/go-tss/conversion"
 

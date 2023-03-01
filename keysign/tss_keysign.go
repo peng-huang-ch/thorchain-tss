@@ -91,7 +91,7 @@ func (tKeySign *TssKeySign) SignMessage(msgsToSign [][]byte, localStateItem stor
 		tKeySign.logger.Info().Msgf("we are not in this rounds key sign")
 		return nil, nil
 	}
-	threshold, err := conversion.GetThreshold(len(localStateItem.ParticipantKeys))
+	threshold, err := conversion.GetThreshold(localStateItem.Threshold)
 	if err != nil {
 		return nil, errors.New("fail to get threshold")
 	}
@@ -130,6 +130,7 @@ func (tKeySign *TssKeySign) SignMessage(msgsToSign [][]byte, localStateItem stor
 	}
 
 	tKeySign.tssCommonStruct.SetPartyInfo(&common.PartyInfo{
+		Threshold:  threshold,
 		PartyMap:   keySignPartyMap,
 		PartyIDMap: partyIDMap,
 	})
@@ -203,7 +204,7 @@ func (tKeySign *TssKeySign) processKeySign(reqNum int, errChan chan struct{}, ou
 			}
 
 			tKeySign.tssCommonStruct.P2PPeersLock.RLock()
-			threshold, err := conversion.GetThreshold(len(tKeySign.tssCommonStruct.P2PPeers) + 1)
+			threshold, err := conversion.GetThreshold(tKeySign.tssCommonStruct.Threshold)
 			tKeySign.tssCommonStruct.P2PPeersLock.RUnlock()
 			if err != nil {
 				tKeySign.logger.Error().Err(err).Msg("error in get the threshold for generate blame")

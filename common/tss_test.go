@@ -204,6 +204,7 @@ func setupProcessVerMsgEnv(c *C, privKey tcrypto.PrivKey, keyPool []string, part
 	partyMap := new(sync.Map)
 	partyMap.Store("tester", keyGenParty)
 	tssCommonStruct.SetPartyInfo(&PartyInfo{
+		Threshold:  1,
 		PartyMap:   partyMap,
 		PartyIDMap: partyIDMap,
 	})

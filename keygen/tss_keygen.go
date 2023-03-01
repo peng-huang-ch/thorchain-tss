@@ -33,7 +33,8 @@ type TssKeyGen struct {
 	p2pComm         *p2p.Communication
 }
 
-func NewTssKeyGen(localP2PID string,
+func NewTssKeyGen(
+	localP2PID string,
 	conf common.TssConfig,
 	localNodePubKey string,
 	broadcastChan chan *messages.BroadcastMsgChan,
@@ -72,15 +73,17 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 		return nil, fmt.Errorf("fail to get keygen parties: %w", err)
 	}
 
-	keyGenLocalStateItem := storage.KeygenLocalState{
-		ParticipantKeys: keygenReq.Keys,
-		LocalPartyKey:   tKeyGen.localNodePubKey,
-	}
-
-	threshold, err := conversion.GetThreshold(len(partiesID))
+	threshold, err := conversion.GetThreshold(keygenReq.Threshold)
 	if err != nil {
 		return nil, err
 	}
+
+	keyGenLocalStateItem := storage.KeygenLocalState{
+		ParticipantKeys: keygenReq.Keys,
+		LocalPartyKey:   tKeyGen.localNodePubKey,
+		Threshold:       threshold,
+	}
+
 	keyGenPartyMap := new(sync.Map)
 	ctx := btss.NewPeerContext(partiesID)
 	params := btss.NewParameters(ctx, localPartyID, len(partiesID), threshold)
@@ -103,6 +106,7 @@ func (tKeyGen *TssKeyGen) GenerateNewKey(keygenReq Request) (*bcrypto.ECPoint, e
 	// we never run multi keygen, so the moniker is set to default empty value
 	keyGenPartyMap.Store("", keyGenParty)
 	partyInfo := &common.PartyInfo{
+		Threshold:  threshold,
 		PartyMap:   keyGenPartyMap,
 		PartyIDMap: partyIDMap,
 	}
@@ -176,7 +180,7 @@ func (tKeyGen *TssKeyGen) processKeyGen(errChan chan struct{},
 				tKeyGen.logger.Error().Err(err).Msg("error in get unicast blame")
 			}
 			tKeyGen.tssCommonStruct.P2PPeersLock.RLock()
-			threshold, err := conversion.GetThreshold(len(tKeyGen.tssCommonStruct.P2PPeers) + 1)
+			threshold, err := conversion.GetThreshold(keyGenLocalStateItem.Threshold)
 			tKeyGen.tssCommonStruct.P2PPeersLock.RUnlock()
 			if err != nil {
 				tKeyGen.logger.Error().Err(err).Msg("error in get the threshold to generate blame")
@@ -193,12 +197,12 @@ func (tKeyGen *TssKeyGen) processKeyGen(errChan chan struct{},
 
 			// if we cannot find the blame node, we check whether everyone send me the share
 			if len(blameMgr.GetBlame().BlameNodes) == 0 {
-				blameNodesMisingShare, isUnicast, err := blameMgr.TssMissingShareBlame(messages.TSSKEYGENROUNDS)
+				blameNodesMissingShare, isUnicast, err := blameMgr.TssMissingShareBlame(messages.TSSKEYGENROUNDS)
 				if err != nil {
 					tKeyGen.logger.Error().Err(err).Msg("fail to get the node of missing share ")
 				}
-				if len(blameNodesMisingShare) > 0 && len(blameNodesMisingShare) <= threshold {
-					blameMgr.GetBlame().AddBlameNodes(blameNodesMisingShare...)
+				if len(blameNodesMissingShare) > 0 && len(blameNodesMissingShare) <= threshold {
+					blameMgr.GetBlame().AddBlameNodes(blameNodesMissingShare...)
 					blameMgr.GetBlame().IsUnicast = isUnicast
 				}
 			}

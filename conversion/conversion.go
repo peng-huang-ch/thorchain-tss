@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"sort"
 	"strconv"
@@ -171,15 +170,15 @@ func BytesToHashString(msg []byte) (string, error) {
 	h := sha256.New()
 	_, err := h.Write(msg)
 	if err != nil {
-		return "", fmt.Errorf("fail to caculate sha256 hash: %w", err)
+		return "", fmt.Errorf("fail to calculate sha256 hash: %w", err)
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func GetThreshold(value int) (int, error) {
-	if value < 0 {
+	if value <= 0 {
 		return 0, errors.New("negative input")
 	}
-	threshold := int(math.Ceil(float64(value)*2.0/3.0)) - 1
-	return threshold, nil
+	// threshold := int(math.Ceil(float64(value)*2.0/3.0)) - 1
+	return value, nil
 }

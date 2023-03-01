@@ -1,6 +1,6 @@
 module = gitlab.com/thorchain/tss/go-tss
 
-.PHONY: clear tools install test test-watch lint-pre lint lint-verbose protob build docker-gitlab-login docker-gitlab-push docker-gitlab-build
+.PHONY: clear tools install test test-watch lint-pre lint lint-verbose protob build docker-gitlab-login docker-gitlab-push docker-gitlab-build samples
 
 all: lint build
 
@@ -48,3 +48,24 @@ build: protob
 
 docker-build:
 	docker build -t registry.gitlab.com/thorchain/tss/go-tss .
+
+samples: client-1 client-2 client-3
+
+client-1:	
+	@echo "[client-1] Starting server..."
+	@go run cmd/tss/tss_http.go cmd/tss/main.go -tss-port :9080 -p2p-port 6668 -loglevel debug --priv-key "ZThiMDAxOTk2MDc4ODk3YWE0YThlMjdkMWY0NjA1MTAwZDgyNDkyYzdhNmMwZWQ3MDBhMWIyMjNmNGMzYjVhYg==" --home "./data/client1"
+
+client-2:
+	@echo "[client-2] Starting server..."
+	@go run cmd/tss/tss_http.go cmd/tss/main.go -tss-port :9081 -p2p-port 6678 -loglevel debug -peer "/ip4/127.0.0.1/tcp/6668/ipfs/16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh" --priv-key "ZTc2ZjI5OTIwOGVlMDk2N2M3Yzc1MjYyODQ0OGUyMjE3NGJiOGRmNGQyZmVmODg0NzQwNmUzYTk1YmQyODlmNA==" --home "./data/client2"
+
+client-3:
+	@echo "[client-3] Starting server..."
+	@go run cmd/tss/tss_http.go cmd/tss/main.go -tss-port :9082 -p2p-port 6688 -loglevel debug -peer "/ip4/127.0.0.1/tcp/6668/ipfs/16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh" --priv-key "MjQ1MDc2MmM4MjU5YjRhZjhhNmFjMmI0ZDBkNzBkOGE1ZTBmNDQ5NGI4NzM4OTYyM2E3MmI0OWMzNmE1ODZhNw==" --home "./data/client3"
+
+client-4:
+	@echo "[client-3] Starting server..."
+	go run cmd/tss/tss_http.go cmd/tss/main.go -tss-port :9083 -p2p-port 6698 -loglevel debug -peer "/ip4/127.0.0.1/tcp/6668/ipfs/16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh" --priv-key "YmNiMzA2ODU1NWNjMzk3NDE1OWMwMTM3MDU0NTNjN2YwMzYzZmVhZDE5NmU3NzRhOTMwOWIxN2QyZTQ0MzdkNg==" --home "./data/client4"
+
+kill-samples:
+	pkill -f ":(9080|9081|9082)"
