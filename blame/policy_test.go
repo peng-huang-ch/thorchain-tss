@@ -35,7 +35,6 @@ var _ = Suite(&policyTestSuite{})
 
 func (p *policyTestSuite) SetUpTest(c *C) {
 	p.blameMgr = NewBlameManager()
-	conversion.SetupBech32Prefix()
 	p1, err := peer.Decode(testPeers[0])
 	c.Assert(err, IsNil)
 	p2, err := peer.Decode(testPeers[1])

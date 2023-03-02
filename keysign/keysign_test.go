@@ -20,8 +20,6 @@ import (
 	maddr "github.com/multiformats/go-multiaddr"
 	zlog "github.com/rs/zerolog/log"
 
-	"gitlab.com/thorchain/tss/go-tss/conversion"
-
 	"github.com/libp2p/go-libp2p/core/peer"
 	tcrypto "github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -102,7 +100,6 @@ type TssKeysignTestSuite struct {
 var _ = Suite(&TssKeysignTestSuite{})
 
 func (s *TssKeysignTestSuite) SetUpSuite(c *C) {
-	conversion.SetupBech32Prefix()
 	common.InitLog("info", true, "keysign_test")
 
 	for _, el := range testNodePrivkey {

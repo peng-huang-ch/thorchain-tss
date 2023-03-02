@@ -18,7 +18,7 @@ type NotifierTestSuite struct{}
 var _ = Suite(&NotifierTestSuite{})
 
 func (*NotifierTestSuite) SetUpSuite(c *C) {
-	conversion.SetupBech32Prefix()
+	// conversion.SetupBech32Prefix()
 }
 
 func (NotifierTestSuite) TestNewNotifier(c *C) {

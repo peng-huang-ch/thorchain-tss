@@ -33,7 +33,6 @@ var _ = Suite(&ConversionTestSuite{})
 
 func (p *ConversionTestSuite) SetUpTest(c *C) {
 	var err error
-	SetupBech32Prefix()
 	p.testPubKeys = testPubKeys[:]
 	sort.Strings(p.testPubKeys)
 	p.localPeerID, err = peer.Decode("16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh")
@@ -217,7 +216,7 @@ func (p *ConversionTestSuite) TestTssPubKey(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(pk, Equals, "")
 	c.Assert(addr.Bytes(), HasLen, 0)
-	SetupBech32Prefix()
+
 	// var point crypto.ECPoint
 	c.Assert(json.Unmarshal([]byte(`{"Coords":[70074650318631491136896111706876206496089700125696166275258483716815143842813,72125378038650252881868972131323661098816214918201601489154946637636730727892]}`), &point), IsNil)
 	pk, addr, err = GetTssPubKey(point)

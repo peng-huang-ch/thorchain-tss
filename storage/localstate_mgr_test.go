@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
+	p2pnet "github.com/libp2p/go-libp2p-testing/net"
 	"github.com/libp2p/go-libp2p/core/peer"
-	tnet "github.com/libp2p/go-libp2p-testing/net"
 	maddr "github.com/multiformats/go-multiaddr"
 	. "gopkg.in/check.v1"
 
-	"gitlab.com/thorchain/tss/go-tss/conversion"
 	"gitlab.com/thorchain/tss/go-tss/p2p"
 )
 
@@ -23,7 +22,7 @@ var _ = Suite(&FileStateMgrTestSuite{})
 func TestPackage(t *testing.T) { TestingT(t) }
 
 func (s *FileStateMgrTestSuite) SetUpTest(c *C) {
-	conversion.SetupBech32Prefix()
+	// conversion.SetupBech32Prefix()
 }
 
 func (s *FileStateMgrTestSuite) TestNewFileStateMgr(c *C) {
@@ -77,9 +76,9 @@ func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
 func (s *FileStateMgrTestSuite) TestSaveAddressBook(c *C) {
 	testAddresses := make(map[peer.ID]p2p.AddrList)
 	var t *testing.T
-	id1 := tnet.RandIdentityOrFatal(t)
-	id2 := tnet.RandIdentityOrFatal(t)
-	id3 := tnet.RandIdentityOrFatal(t)
+	id1 := p2pnet.RandIdentityOrFatal(t)
+	id2 := p2pnet.RandIdentityOrFatal(t)
+	id3 := p2pnet.RandIdentityOrFatal(t)
 	mockAddr, err := maddr.NewMultiaddr("/ip4/192.168.3.5/tcp/6668")
 	c.Assert(err, IsNil)
 	peers := []peer.ID{id1.ID(), id2.ID(), id3.ID()}

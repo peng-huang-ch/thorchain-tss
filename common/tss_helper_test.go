@@ -61,7 +61,6 @@ func (t *tssHelpSuite) TestMsgToHashString(c *C) {
 }
 
 func (t *tssHelpSuite) TestTssCommon_NotifyTaskDone(c *C) {
-	conversion.SetupBech32Prefix()
 	pk, err := sdk.UnmarshalPubKey(sdk.AccPK, "thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3")
 	c.Assert(err, IsNil)
 	peerID, err := conversion.GetPeerIDFromSecp256PubKey(pk.Bytes())

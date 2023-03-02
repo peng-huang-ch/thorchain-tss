@@ -15,7 +15,6 @@ type KeyProviderTestSuite struct{}
 var _ = Suite(&KeyProviderTestSuite{})
 
 func TestGetPubKeysFromPeerIDs(t *testing.T) {
-	SetupBech32Prefix()
 	input := []string{
 		"16Uiu2HAmBdJRswX94UwYj6VLhh4GeUf9X3SjBRgTqFkeEMLmfk2M",
 		"16Uiu2HAkyR9dsFqkj1BqKw8ZHAUU2yur6ZLRJxPTiiVYP5uBMeMG",
@@ -80,7 +79,6 @@ func (KeyProviderTestSuite) TestGetPeerIDFromPubKey(c *C) {
 func (KeyProviderTestSuite) TestCheckKeyOnCurve(c *C) {
 	_, err := CheckKeyOnCurve("aa")
 	c.Assert(err, NotNil)
-	SetupBech32Prefix()
 	_, err = CheckKeyOnCurve("thorpub1addwnpepqtctt9l4fddeh0krvdpxmqsxa5z9xsa0ac6frqfhm9fq6c6u5lck5s8fm4n")
 	c.Assert(err, IsNil)
 }

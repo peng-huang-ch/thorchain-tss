@@ -26,7 +26,6 @@ import (
 	. "gopkg.in/check.v1"
 
 	"gitlab.com/thorchain/tss/go-tss/common"
-	"gitlab.com/thorchain/tss/go-tss/conversion"
 	"gitlab.com/thorchain/tss/go-tss/messages"
 	"gitlab.com/thorchain/tss/go-tss/p2p"
 	"gitlab.com/thorchain/tss/go-tss/storage"
@@ -74,7 +73,6 @@ var _ = Suite(&TssKeygenTestSuite{})
 
 func (s *TssKeygenTestSuite) SetUpSuite(c *C) {
 	common.InitLog("info", true, "keygen_test")
-	conversion.SetupBech32Prefix()
 	for _, el := range testNodePrivkey {
 		priHexBytes, err := hex.DecodeString(el)
 		c.Assert(err, IsNil)
