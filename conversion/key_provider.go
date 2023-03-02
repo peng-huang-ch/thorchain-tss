@@ -1,14 +1,11 @@
 package conversion
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec"
-	coskey "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	sdk "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	"github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
 	tcrypto "github.com/tendermint/tendermint/crypto"
@@ -17,11 +14,11 @@ import (
 
 // GetPeerIDFromPubKey get the peer.ID from bech32 format node pub key
 func GetPeerIDFromPubKey(pubkey string) (peer.ID, error) {
-	pk, err := sdk.UnmarshalPubKey(sdk.AccPK, pubkey)
+	pubKey, err := hex.DecodeString(pubkey)
 	if err != nil {
 		return "", fmt.Errorf("fail to parse account pub key(%s): %w", pubkey, err)
 	}
-	ppk, err := crypto.UnmarshalSecp256k1PublicKey(pk.Bytes())
+	ppk, err := crypto.UnmarshalSecp256k1PublicKey(pubKey)
 	if err != nil {
 		return "", fmt.Errorf("fail to convert pubkey to the crypto pubkey used in libp2p: %w", err)
 	}
@@ -81,18 +78,15 @@ func GetPubKeyFromPeerID(pID string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("faail to get pub key raw bytes: %w", err)
 	}
-	pubKey := coskey.PubKey{
-		Key: rawBytes,
-	}
-	return sdk.MarshalPubKey(sdk.AccPK, &pubKey)
+	// pubKey := coskey.PubKey{
+	// 	Key: rawBytes,
+	// }
+	fmt.Println("GetPubKeyFromPeerID : ", hex.EncodeToString(rawBytes))
+	return hex.EncodeToString(rawBytes), nil
 }
 
 func GetPriKey(priKeyString string) (tcrypto.PrivKey, error) {
-	priHexBytes, err := base64.StdEncoding.DecodeString(priKeyString)
-	if err != nil {
-		return nil, fmt.Errorf("fail to decode private key: %w", err)
-	}
-	rawBytes, err := hex.DecodeString(string(priHexBytes))
+	rawBytes, err := hex.DecodeString(priKeyString)
 	if err != nil {
 		return nil, fmt.Errorf("fail to hex decode private key: %w", err)
 	}
@@ -112,11 +106,11 @@ func GetPriKeyRawBytes(priKey tcrypto.PrivKey) ([]byte, error) {
 }
 
 func CheckKeyOnCurve(pk string) (bool, error) {
-	pubKey, err := sdk.UnmarshalPubKey(sdk.AccPK, pk)
+	pubKey, err := hex.DecodeString(pk)
 	if err != nil {
 		return false, fmt.Errorf("fail to parse pub key(%s): %w", pk, err)
 	}
-	bPk, err := btcec.ParsePubKey(pubKey.Bytes(), btcec.S256())
+	bPk, err := btcec.ParsePubKey(pubKey, btcec.S256())
 	if err != nil {
 		return false, err
 	}

@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -44,7 +43,7 @@ var _ = Suite(&TssTestSuite{})
 func (t *TssTestSuite) SetUpSuite(c *C) {
 	InitLog("info", true, "tss_common_test")
 	conversion.SetupBech32Prefix()
-	priHexBytes, err := base64.StdEncoding.DecodeString(testBlamePrivKey)
+	priHexBytes, err := hex.DecodeString(testBlamePrivKey)
 	c.Assert(err, IsNil)
 	rawBytes, err := hex.DecodeString(string(priHexBytes))
 	c.Assert(err, IsNil)

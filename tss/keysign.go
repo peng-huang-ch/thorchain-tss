@@ -1,7 +1,7 @@
 package tss
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -229,7 +229,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 
 	var msgsToSign [][]byte
 	for _, val := range req.Messages {
-		msgToSign, err := base64.StdEncoding.DecodeString(val)
+		msgToSign, err := hex.DecodeString(val)
 		if err != nil {
 			return keysign.Response{}, fmt.Errorf("fail to decode message(%s): %w", strings.Join(req.Messages, ","), err)
 		}
@@ -251,15 +251,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 		return true
 	})
 
-	oldJoinParty, err := conversion.VersionLTCheck(req.Version, messages.NEWJOINPARTYVERSION)
-	if err != nil {
-		return keysign.Response{
-			Status: common.Fail,
-			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
-		}, errors.New("fail to parse the version")
-	}
-
-	if len(req.SignerPubKeys) == 0 && oldJoinParty {
+	if len(req.SignerPubKeys) == 0 {
 		return emptyResp, errors.New("empty signer pub keys")
 	}
 
@@ -268,7 +260,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 		t.logger.Error().Err(err).Msg("fail to get the threshold")
 		return emptyResp, errors.New("fail to get threshold")
 	}
-	if len(req.SignerPubKeys) <= threshold && oldJoinParty {
+	if len(req.SignerPubKeys) <= threshold {
 		t.logger.Error().Msgf("not enough signers, threshold=%d and signers=%d", threshold, len(req.SignerPubKeys))
 		return emptyResp, errors.New("not enough signers")
 	}
@@ -335,10 +327,10 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 func (t *TssServer) batchSignatures(sigs []*tsslibcommon.ECSignature, msgsToSign [][]byte) keysign.Response {
 	var signatures []keysign.Signature
 	for i, sig := range sigs {
-		msg := base64.StdEncoding.EncodeToString(msgsToSign[i])
-		r := base64.StdEncoding.EncodeToString(sig.R)
-		s := base64.StdEncoding.EncodeToString(sig.S)
-		recovery := base64.StdEncoding.EncodeToString(sig.SignatureRecovery)
+		msg := hex.EncodeToString(msgsToSign[i])
+		r := hex.EncodeToString(sig.R)
+		s := hex.EncodeToString(sig.S)
+		recovery := hex.EncodeToString(sig.SignatureRecovery)
 
 		signature := keysign.NewSignature(msg, r, s, recovery)
 		signatures = append(signatures, signature)

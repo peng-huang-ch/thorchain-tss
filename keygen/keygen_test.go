@@ -1,7 +1,6 @@
 package keygen
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
@@ -77,7 +76,7 @@ func (s *TssKeygenTestSuite) SetUpSuite(c *C) {
 	common.InitLog("info", true, "keygen_test")
 	conversion.SetupBech32Prefix()
 	for _, el := range testNodePrivkey {
-		priHexBytes, err := base64.StdEncoding.DecodeString(el)
+		priHexBytes, err := hex.DecodeString(el)
 		c.Assert(err, IsNil)
 		rawBytes, err := hex.DecodeString(string(priHexBytes))
 		c.Assert(err, IsNil)
@@ -114,7 +113,7 @@ func (s *TssKeygenTestSuite) SetUpTest(c *C) {
 	c.Assert(err, IsNil)
 	s.preParams = getPreparams(c)
 	for i := 0; i < s.partyNum; i++ {
-		buf, err := base64.StdEncoding.DecodeString(testPriKeyArr[i])
+		buf, err := hex.DecodeString(testPriKeyArr[i])
 		c.Assert(err, IsNil)
 		if i == 0 {
 			comm, err := p2p.NewCommunication("asgard", nil, ports[i], "")

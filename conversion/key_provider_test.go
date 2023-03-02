@@ -1,7 +1,7 @@
 package conversion
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +38,7 @@ func (*KeyProviderTestSuite) TestGetPriKey(c *C) {
 	pk, err := GetPriKey("whatever")
 	c.Assert(err, NotNil)
 	c.Assert(pk, IsNil)
-	input := base64.StdEncoding.EncodeToString([]byte("whatever"))
+	input := hex.EncodeToString([]byte("whatever"))
 	pk, err = GetPriKey(input)
 	c.Assert(err, NotNil)
 	c.Assert(pk, IsNil)

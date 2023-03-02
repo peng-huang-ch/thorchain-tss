@@ -19,7 +19,6 @@ func main() {
 	flag.Parse()
 	files := flag.Args()
 
-	setupBech32Prefix()
 	allSecret := make([]KeygenLocalState, len(files))
 	for i, f := range files {
 		tssSecret, err := getTssSecretFile(f)
@@ -48,13 +47,12 @@ func main() {
 	privKey := NewPrivateKey(tssPrivateKey)
 
 	pk := privKey.PubKey()
-	thorchainpk, address, err := getTssPubKey(pk.X, pk.Y)
+	secp256k1PubKey, err := getTssPubKey(pk.X, pk.Y)
 	if err != nil {
 		fmt.Printf("--->%v", err)
 	}
 	fmt.Printf("---recoverd sk:%v\n", privKey)
-	fmt.Printf("---recoverd pk:%v\n", thorchainpk)
-	fmt.Printf("-------%v\n", address)
+	fmt.Printf("---recoverd pk:%v\n", secp256k1PubKey)
 
 	if len(*export) > 0 && len(*password) >= 8 {
 		keyfile, err := exportKeyStore(privKey.Serialize(), *password)

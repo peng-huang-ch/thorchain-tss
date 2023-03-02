@@ -39,8 +39,6 @@ func main() {
 	_ = golog.SetLogLevel("tss-lib", "INFO")
 	common.InitLog(logLevel, pretty, "tss_service")
 
-	// Setup Bech32 Prefixes
-	conversion.SetupBech32Prefix()
 	// this is only need for the binance library
 	if os.Getenv("NET") == "testnet" || os.Getenv("NET") == "mocknet" {
 		types.Network = types.TestNetwork

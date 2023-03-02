@@ -1,7 +1,7 @@
 package keysign
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 
@@ -44,7 +44,7 @@ func (NotifierTestSuite) TestNewNotifier(c *C) {
 
 func (NotifierTestSuite) TestNotifierHappyPath(c *C) {
 	messageToSign := "yhEwrxWuNBGnPT/L7PNnVWg7gFWNzCYTV+GuX3tKRH8="
-	buf, err := base64.StdEncoding.DecodeString(messageToSign)
+	buf, err := hex.DecodeString(messageToSign)
 	c.Assert(err, IsNil)
 	messageID, err := common.MsgToHashString(buf)
 	c.Assert(err, IsNil)

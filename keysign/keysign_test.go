@@ -1,7 +1,6 @@
 package keysign
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -107,7 +106,7 @@ func (s *TssKeysignTestSuite) SetUpSuite(c *C) {
 	common.InitLog("info", true, "keysign_test")
 
 	for _, el := range testNodePrivkey {
-		priHexBytes, err := base64.StdEncoding.DecodeString(el)
+		priHexBytes, err := hex.DecodeString(el)
 		c.Assert(err, IsNil)
 		rawBytes, err := hex.DecodeString(string(priHexBytes))
 		c.Assert(err, IsNil)
@@ -138,7 +137,7 @@ func (s *TssKeysignTestSuite) SetUpTest(c *C) {
 	multiAddr, err := maddr.NewMultiaddr(bootstrapPeer)
 	c.Assert(err, IsNil)
 	for i := 0; i < s.partyNum; i++ {
-		buf, err := base64.StdEncoding.DecodeString(testPriKeyArr[i])
+		buf, err := hex.DecodeString(testPriKeyArr[i])
 		c.Assert(err, IsNil)
 		if i == 0 {
 			comm, err := p2p.NewCommunication("asgard", nil, ports[i], "")

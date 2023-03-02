@@ -1,6 +1,7 @@
 package tss
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -8,8 +9,6 @@ import (
 	"sync"
 
 	bkeygen "github.com/binance-chain/tss-lib/ecdsa/keygen"
-	coskey "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	sdk "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	"github.com/libp2p/go-libp2p/core/peer"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -52,14 +51,8 @@ func NewTss(
 	preParams *bkeygen.LocalPreParams,
 	externalIP string,
 ) (*TssServer, error) {
-	pk := coskey.PubKey{
-		Key: priKey.PubKey().Bytes()[:],
-	}
-
-	pubKey, err := sdk.MarshalPubKey(sdk.AccPK, &pk)
-	if err != nil {
-		return nil, fmt.Errorf("fail to genearte the key: %w", err)
-	}
+	ppk := priKey.PubKey().Bytes()[:]
+	pubKey := hex.EncodeToString(ppk)
 
 	stateManager, err := storage.NewFileStateMgr(baseFolder)
 	if err != nil {
@@ -171,7 +164,7 @@ func (t *TssServer) joinParty(msgID, version string, blockHeight int64, particip
 		return nil, "", fmt.Errorf("fail to parse the version with error:%w", err)
 	}
 	if oldJoinParty {
-		t.logger.Info().Msg("we apply the leadless join party")
+		t.logger.Info().Msg("we apply the leaderless join party")
 		peerIDs, err := conversion.GetPeerIDsFromPubKeys(participants)
 		if err != nil {
 			return nil, "NONE", fmt.Errorf("fail to convert pub key to peer id: %w", err)

@@ -129,7 +129,7 @@ func (t *TssServer) Keygen(req keygen.Request) (keygen.Response, error) {
 	blameNodes := *blameMgr.GetBlame()
 	return keygen.NewResponse(
 		newPubKey,
-		addr.String(),
+		addr,
 		status,
 		blameNodes,
 	), nil
