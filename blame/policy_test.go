@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	testPubKeys = [...]string{"thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3", "thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09", "thorpub1addwnpepq2ryyje5zr09lq7gqptjwnxqsy2vcdngvwd6z7yt5yjcnyj8c8cn559xe69", "thorpub1addwnpepqfjcw5l4ay5t00c32mmlky7qrppepxzdlkcwfs2fd5u73qrwna0vzag3y4j"}
+	testPubKeys = [...]string{"02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5", "02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6", "0286424b3410de5f83c80057274cc08114cc3668639ba1788ba125899247c1f13a", "02658753f5e928b7bf1156f7fb13c0184390984dfdb0e4c1496d39e8806e9f5ec1"}
 
 	testPeers = []string{
 		"16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh",
@@ -115,7 +115,7 @@ func (p *policyTestSuite) TestTssWrongShareBlame(c *C) {
 	}
 	target, err := p.blameMgr.TssWrongShareBlame(&msg)
 	c.Assert(err, IsNil)
-	c.Assert(target, Equals, "thorpub1addwnpepqfjcw5l4ay5t00c32mmlky7qrppepxzdlkcwfs2fd5u73qrwna0vzag3y4j")
+	c.Assert(target, Equals, "02658753f5e928b7bf1156f7fb13c0184390984dfdb0e4c1496d39e8806e9f5ec1")
 }
 
 func (p *policyTestSuite) TestTssMissingShareBlame(c *C) {

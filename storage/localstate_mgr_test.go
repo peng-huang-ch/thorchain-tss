@@ -39,9 +39,9 @@ func (s *FileStateMgrTestSuite) TestNewFileStateMgr(c *C) {
 	c.Assert(err, IsNil)
 	fileName, err := fsm.getFilePathName("whatever")
 	c.Assert(err, NotNil)
-	fileName, err = fsm.getFilePathName("thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq")
+	fileName, err = fsm.getFilePathName("024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a")
 	c.Assert(err, IsNil)
-	c.Assert(fileName, Equals, filepath.Join(f, "localstate-thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq.json"))
+	c.Assert(fileName, Equals, filepath.Join(f, "localstate-024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a.json"))
 }
 
 func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
@@ -63,7 +63,7 @@ func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(fsm, NotNil)
 	c.Assert(fsm.SaveLocalState(stateItem), NotNil)
-	stateItem.PubKey = "thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq"
+	stateItem.PubKey = "024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a"
 	c.Assert(fsm.SaveLocalState(stateItem), IsNil)
 	filePathName := filepath.Join(f, "localstate-"+stateItem.PubKey+".json")
 	_, err = os.Stat(filePathName)

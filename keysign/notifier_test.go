@@ -48,7 +48,7 @@ func (NotifierTestSuite) TestNotifierHappyPath(c *C) {
 	c.Assert(err, IsNil)
 	messageID, err := common.MsgToHashString(buf)
 	c.Assert(err, IsNil)
-	poolPubKey := `thorpub1addwnpepq0ul3xt882a6nm6m7uhxj4tk2n82zyu647dyevcs5yumuadn4uamqx7neak`
+	poolPubKey := `03f9f899673abba9ef5bf72e69557654cea1139aaf9a4cb310a139be75b3af3bb0`
 	n, err := NewNotifier(messageID, [][]byte{buf}, poolPubKey)
 	c.Assert(err, IsNil)
 	c.Assert(n, NotNil)
