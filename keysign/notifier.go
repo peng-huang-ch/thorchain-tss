@@ -2,12 +2,12 @@ package keysign
 
 import (
 	"crypto/ecdsa"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math/big"
 
 	"github.com/binance-chain/tss-lib/common"
-	sdk "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	"github.com/tendermint/btcd/btcec"
 )
 
@@ -44,11 +44,11 @@ func NewNotifier(messageID string, messages [][]byte, poolPubKey string) (*Notif
 // go-tss respect the payload it receives , assume the payload had been hashed already by whoever send it in.
 func (n *Notifier) verifySignature(data *common.ECSignature, msg []byte) (bool, error) {
 	// we should be able to use any of the pubkeys to verify the signature
-	pubKey, err := sdk.UnmarshalPubKey(sdk.AccPK, n.poolPubKey)
+	pubKey, err := hex.DecodeString(n.poolPubKey)
 	if err != nil {
 		return false, fmt.Errorf("fail to get pubkey from bech32 pubkey string(%s):%w", n.poolPubKey, err)
 	}
-	pub, err := btcec.ParsePubKey(pubKey.Bytes(), btcec.S256())
+	pub, err := btcec.ParsePubKey(pubKey, btcec.S256())
 	if err != nil {
 		return false, err
 	}

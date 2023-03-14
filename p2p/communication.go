@@ -176,8 +176,7 @@ func (c *Communication) readFromStream(stream network.Stream) {
 		c.streamMgr.AddStream(wrappedMsg.MsgID, stream)
 		channel := c.getSubscriber(wrappedMsg.MessageType, wrappedMsg.MsgID)
 		if nil == channel {
-			c.logger.Debug().Msgf("no MsgID %s found for this message", wrappedMsg.MsgID)
-			c.logger.Debug().Msgf("no MsgID %s found for this message", wrappedMsg.MessageType)
+			c.logger.Debug().Msgf("no MsgID %s MessageType %s found for this message", wrappedMsg.MsgID, wrappedMsg.MessageType)
 			return
 		}
 		channel <- &Message{
@@ -345,7 +344,7 @@ func (c *Communication) startChannel(privKeyBytes []byte) error {
 
 func (c *Communication) connectToOnePeer(pID peer.ID) (network.Stream, error) {
 	c.logger.Debug().Msgf("peer:%s,current:%s", pID, c.host.ID())
-	// dont connect to itself
+	// don't connect to itself
 	if pID == c.host.ID() {
 		return nil, nil
 	}

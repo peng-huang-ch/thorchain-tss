@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	testPubKeys = [...]string{"thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3", "thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09", "thorpub1addwnpepq2ryyje5zr09lq7gqptjwnxqsy2vcdngvwd6z7yt5yjcnyj8c8cn559xe69", "thorpub1addwnpepqfjcw5l4ay5t00c32mmlky7qrppepxzdlkcwfs2fd5u73qrwna0vzag3y4j"}
+	testPubKeys = [...]string{"02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5", "02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6", "0286424b3410de5f83c80057274cc08114cc3668639ba1788ba125899247c1f13a", "02658753f5e928b7bf1156f7fb13c0184390984dfdb0e4c1496d39e8806e9f5ec1"}
 	testPeers   = []string{
 		"16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh",
 		"16Uiu2HAm2FzqoUdS6Y9Esg2EaGcAG5rVe1r6BFNnmmQr2H3bqafa",
@@ -33,7 +33,6 @@ var _ = Suite(&ConversionTestSuite{})
 
 func (p *ConversionTestSuite) SetUpTest(c *C) {
 	var err error
-	SetupBech32Prefix()
 	p.testPubKeys = testPubKeys[:]
 	sort.Strings(p.testPubKeys)
 	p.localPeerID, err = peer.Decode("16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh")
@@ -89,7 +88,6 @@ func (p *ConversionTestSuite) TestGetParties(c *C) {
 	c.Assert(err, NotNil)
 }
 
-//
 func (p *ConversionTestSuite) TestGetPeerIDFromPartyID(c *C) {
 	_, localParty, err := GetParties(p.testPubKeys, p.testPubKeys[0])
 	c.Assert(err, IsNil)
@@ -218,11 +216,11 @@ func (p *ConversionTestSuite) TestTssPubKey(c *C) {
 	c.Assert(err, NotNil)
 	c.Assert(pk, Equals, "")
 	c.Assert(addr.Bytes(), HasLen, 0)
-	SetupBech32Prefix()
+
 	// var point crypto.ECPoint
 	c.Assert(json.Unmarshal([]byte(`{"Coords":[70074650318631491136896111706876206496089700125696166275258483716815143842813,72125378038650252881868972131323661098816214918201601489154946637636730727892]}`), &point), IsNil)
 	pk, addr, err = GetTssPubKey(point)
 	c.Assert(err, IsNil)
-	c.Assert(pk, Equals, "thorpub1addwnpepq2dwek9hkrlxjxadrlmy9fr42gqyq6029q0hked46l3u6a9fxqel6tma5eu")
+	c.Assert(pk, Equals, "029aecd8b7b0fe691bad1ff642a47552004069ea281f7b65b5d7e3cd74a93033fd")
 	c.Assert(addr.String(), Equals, "bnb17l7cyxqzg4xymnl0alrhqwja276s3rns4256c2")
 }

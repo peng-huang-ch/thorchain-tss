@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/libp2p/go-libp2p/core/host"
 	tnet "github.com/libp2p/go-libp2p-testing/net"
+	"github.com/libp2p/go-libp2p/core/host"
 	mocknet "github.com/libp2p/go-libp2p/p2p/net/mock"
 	"github.com/stretchr/testify/assert"
 
@@ -118,7 +118,7 @@ func TestNewPartyCoordinator(t *testing.T) {
 	}()
 
 	msgID := conversion.RandStringBytesMask(64)
-	leader, err := LeaderNode(msgID, 10, peers)
+	leader, err := LeaderNode(msgID, "10", peers)
 	assert.Nil(t, err)
 
 	// we sort the slice to ensure the leader is the first one easy for testing
@@ -162,7 +162,7 @@ func TestNewPartyCoordinatorTimeOut(t *testing.T) {
 
 	msgID := conversion.RandStringBytesMask(64)
 	wg := sync.WaitGroup{}
-	leader, err := LeaderNode(msgID, 10, peers)
+	leader, err := LeaderNode(msgID, "10", peers)
 	assert.Nil(t, err)
 
 	// we sort the slice to ensure the leader is the first one easy for testing

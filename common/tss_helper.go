@@ -26,6 +26,26 @@ import (
 	"gitlab.com/thorchain/tss/go-tss/messages"
 )
 
+func ContainsParticipants(all, sub []string) bool {
+	if len(all) == 0 || len(sub) == 0 {
+		return false
+	}
+
+	hash := make(map[string]bool)
+
+	for _, val := range all {
+		hash[val] = true
+	}
+
+	for _, val := range sub {
+		if _, ok := hash[val]; !ok {
+			return false
+		}
+	}
+
+	return true
+}
+
 func Contains(s []*btss.PartyID, e *btss.PartyID) bool {
 	if e == nil {
 		return false
@@ -49,7 +69,7 @@ func MsgToHashString(msg []byte) (string, error) {
 	h := sha256.New()
 	_, err := h.Write(msg)
 	if err != nil {
-		return "", fmt.Errorf("fail to caculate sha256 hash: %w", err)
+		return "", fmt.Errorf("fail to calculate sha256 hash: %w", err)
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
