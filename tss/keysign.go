@@ -44,38 +44,9 @@ func (t *TssServer) generateSignature(msgID string, msgsToSign [][]byte, req key
 			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
 		}, nil
 	}
-
-	oldJoinParty, err := conversion.VersionLTCheck(req.Version, messages.NEWJOINPARTYVERSION)
-	if err != nil {
-		return keysign.Response{
-			Status: common.Fail,
-			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
-		}, errors.New("fail to parse the version")
-	}
-	// we use the old join party
-	if oldJoinParty {
-		allParticipants = req.SignerPubKeys
-		myPk, err := conversion.GetPubKeyFromPeerID(t.p2pCommunication.GetHost().ID().String())
-		if err != nil {
-			t.logger.Info().Msgf("fail to convert the p2p id(%s) to pubkey, turn to wait for signature", t.p2pCommunication.GetHost().ID().String())
-			return keysign.Response{}, p2p.ErrNotActiveSigner
-		}
-		isSignMember := false
-		for _, el := range allParticipants {
-			if myPk == el {
-				isSignMember = true
-				break
-			}
-		}
-		if !isSignMember {
-			t.logger.Info().Msgf("we(%s) are not the active signer", t.p2pCommunication.GetHost().ID().String())
-			return keysign.Response{}, p2p.ErrNotActiveSigner
-		}
-
-	}
-
+	participants := req.SignerPubKeys
 	joinPartyStartTime := time.Now()
-	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.BlockHeight, allParticipants, threshold, sigChan)
+	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.ConsensusID, participants, threshold, sigChan)
 	joinPartyTime := time.Since(joinPartyStartTime)
 	if errJoinParty != nil {
 		// we received the signature from waiting for signature
@@ -83,7 +54,7 @@ func (t *TssServer) generateSignature(msgID string, msgsToSign [][]byte, req key
 			return keysign.Response{}, errJoinParty
 		}
 		t.tssMetrics.KeysignJoinParty(joinPartyTime, false)
-		// this indicate we are processing the leaderness join party
+		// this indicate we are processing the leaderless join party
 		if leader == "NONE" {
 			if onlinePeers == nil {
 				t.logger.Error().Err(errJoinParty).Msg("error before we start join party")
@@ -189,6 +160,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 		Msg("received keysign request")
 	emptyResp := keysign.Response{}
 	msgID, err := t.requestToMsgId(req)
+	t.logger.Debug().Str("msgID", msgID).Str("ConsensusID", req.ConsensusID).Msg("msgID")
 	if err != nil {
 		return emptyResp, err
 	}

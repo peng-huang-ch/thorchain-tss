@@ -23,7 +23,7 @@ func (ms *MessageIDSubscriber) Subscribe(msgID string, channel chan *Message) {
 	ms.subscribers[msgID] = channel
 }
 
-// UnSubscribe a messageid
+// UnSubscribe a message id
 func (ms *MessageIDSubscriber) UnSubscribe(msgID string) {
 	ms.lock.Lock()
 	defer ms.lock.Unlock()

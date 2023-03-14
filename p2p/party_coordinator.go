@@ -25,6 +25,7 @@ var (
 	ErrSignReceived     = errors.New("signature received")
 	ErrNotActiveSigner  = errors.New("not active signer")
 	ErrSigGenerated     = errors.New("signature generated")
+	ErrUnRelatedSigner  = errors.New("unrelated signer")
 )
 
 type PartyCoordinator struct {
@@ -386,7 +387,7 @@ func (pc *PartyCoordinator) joinPartyMember(msgID string, leader string, thresho
 		if err != nil {
 			pc.logger.Error().Msg("leader is not reachable")
 		}
-		pc.logger.Error().Msgf("leader(%s) is not reachable", leaderPk)
+		pc.logger.Error().Msgf("leader(%s:%s) is not reachable", leader, leaderPk)
 		return nil, ErrLeaderNotReady
 	}
 
@@ -477,18 +478,18 @@ func (pc *PartyCoordinator) joinPartyLeader(msgID string, peers []string, thresh
 	return onlinePeers, nil
 }
 
-func (pc *PartyCoordinator) JoinPartyWithLeader(msgID string, blockHeight int64, peers []string, threshold int, signChan chan string) ([]peer.ID, string, error) {
-	leader, err := LeaderNode(msgID, blockHeight, peers)
+func (pc *PartyCoordinator) JoinPartyWithLeader(msgID string, consensusID string, peers []string, threshold int, signChan chan string) ([]peer.ID, string, error) {
+	leader, err := LeaderNode(msgID, consensusID, peers)
 	if err != nil {
 		return nil, "", err
 	}
 	if pc.host.ID().String() == leader {
-		onlines, err := pc.joinPartyLeader(msgID, peers, threshold, signChan)
-		return onlines, leader, err
+		onlinePeers, err := pc.joinPartyLeader(msgID, peers, threshold, signChan)
+		return onlinePeers, leader, err
 	}
 	// now we are just the normal peer
-	onlines, err := pc.joinPartyMember(msgID, leader, threshold, signChan)
-	return onlines, leader, err
+	onlinePeers, err := pc.joinPartyMember(msgID, leader, threshold, signChan)
+	return onlinePeers, leader, err
 }
 
 // JoinPartyWithRetry this method provide the functionality to join party with retry and back off

@@ -49,7 +49,7 @@ func (t *TssServer) Keygen(req keygen.Request) (keygen.Response, error) {
 	sigChan := make(chan string)
 	blameMgr := keygenInstance.GetTssCommonStruct().GetBlameMgr()
 	joinPartyStartTime := time.Now()
-	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.BlockHeight, req.Keys, len(req.Keys)-1, sigChan)
+	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.ConsensusID, req.Keys, len(req.Keys)-1, sigChan)
 	joinPartyTime := time.Since(joinPartyStartTime)
 	if errJoinParty != nil {
 		t.tssMetrics.KeygenJoinParty(joinPartyTime, false)

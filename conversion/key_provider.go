@@ -76,12 +76,8 @@ func GetPubKeyFromPeerID(pID string) (string, error) {
 	}
 	rawBytes, err := pk.Raw()
 	if err != nil {
-		return "", fmt.Errorf("faail to get pub key raw bytes: %w", err)
+		return "", fmt.Errorf("fail to get pub key raw bytes: %w", err)
 	}
-	// pubKey := coskey.PubKey{
-	// 	Key: rawBytes,
-	// }
-	fmt.Println("GetPubKeyFromPeerID : ", hex.EncodeToString(rawBytes))
 	return hex.EncodeToString(rawBytes), nil
 }
 

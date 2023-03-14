@@ -110,7 +110,7 @@ func (tKeySign *TssKeySign) SignMessage(msgsToSign [][]byte, localStateItem stor
 		partiesID, eachLocalPartyID, err := conversion.GetParties(parties, localStateItem.LocalPartyKey)
 		ctx := btss.NewPeerContext(partiesID)
 		if err != nil {
-			return nil, fmt.Errorf("error to create parties in batch signging %w\n", err)
+			return nil, fmt.Errorf("error to create parties in batch signing %w\n", err)
 		}
 		tKeySign.logger.Info().Msgf("message: (%s) keysign parties: %+v", m.String(), parties)
 		eachLocalPartyID.Moniker = moniker

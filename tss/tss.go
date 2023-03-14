@@ -18,7 +18,6 @@ import (
 	"gitlab.com/thorchain/tss/go-tss/conversion"
 	"gitlab.com/thorchain/tss/go-tss/keygen"
 	"gitlab.com/thorchain/tss/go-tss/keysign"
-	"gitlab.com/thorchain/tss/go-tss/messages"
 	"gitlab.com/thorchain/tss/go-tss/monitor"
 	"gitlab.com/thorchain/tss/go-tss/p2p"
 	"gitlab.com/thorchain/tss/go-tss/storage"
@@ -138,18 +137,21 @@ func (t *TssServer) Stop() {
 func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 	var dat []byte
 	var keys []string
+	var consensusID string
 	switch value := request.(type) {
 	case keygen.Request:
 		keys = value.Keys
+		consensusID = value.ConsensusID
 	case keysign.Request:
 		sort.Strings(value.Messages)
 		dat = []byte(strings.Join(value.Messages, ","))
 		keys = value.SignerPubKeys
+		consensusID = value.ConsensusID
 	default:
 		t.logger.Error().Msg("unknown request type")
 		return "", errors.New("unknown request type")
 	}
-	keyAccumulation := ""
+	keyAccumulation := consensusID
 	sort.Strings(keys)
 	for _, el := range keys {
 		keyAccumulation += el
@@ -158,41 +160,24 @@ func (t *TssServer) requestToMsgId(request interface{}) (string, error) {
 	return common.MsgToHashString(dat)
 }
 
-func (t *TssServer) joinParty(msgID, version string, blockHeight int64, participants []string, threshold int, sigChan chan string) ([]peer.ID, string, error) {
-	oldJoinParty, err := conversion.VersionLTCheck(version, messages.NEWJOINPARTYVERSION)
+func (t *TssServer) joinParty(msgID, version string, consensusID string, participants []string, threshold int, sigChan chan string) ([]peer.ID, string, error) {
+	t.logger.Info().Msg("we apply the join party with a leader")
+
+	if len(participants) == 0 {
+		t.logger.Error().Msg("we fail to have any participants or passed by request")
+		return nil, "", errors.New("no participants can be found")
+	}
+	peersIDs, err := conversion.GetPeerIDsFromPubKeys(participants)
 	if err != nil {
-		return nil, "", fmt.Errorf("fail to parse the version with error:%w", err)
+		return nil, "", errors.New("fail to convert the public key to peer ID")
 	}
-	if oldJoinParty {
-		t.logger.Info().Msg("we apply the leaderless join party")
-		peerIDs, err := conversion.GetPeerIDsFromPubKeys(participants)
-		if err != nil {
-			return nil, "NONE", fmt.Errorf("fail to convert pub key to peer id: %w", err)
-		}
-		var peersIDStr []string
-		for _, el := range peerIDs {
-			peersIDStr = append(peersIDStr, el.String())
-		}
-		onlines, err := t.partyCoordinator.JoinPartyWithRetry(msgID, peersIDStr)
-		return onlines, "NONE", err
-	} else {
-		t.logger.Info().Msg("we apply the join party with a leader")
-
-		if len(participants) == 0 {
-			t.logger.Error().Msg("we fail to have any participants or passed by request")
-			return nil, "", errors.New("no participants can be found")
-		}
-		peersID, err := conversion.GetPeerIDsFromPubKeys(participants)
-		if err != nil {
-			return nil, "", errors.New("fail to convert the public key to peer ID")
-		}
-		var peersIDStr []string
-		for _, el := range peersID {
-			peersIDStr = append(peersIDStr, el.String())
-		}
-
-		return t.partyCoordinator.JoinPartyWithLeader(msgID, blockHeight, peersIDStr, threshold, sigChan)
+	var peers []string
+	for _, el := range peersIDs {
+		peers = append(peers, el.String())
 	}
+
+	return t.partyCoordinator.JoinPartyWithLeader(msgID, consensusID, peers, threshold, sigChan)
+
 }
 
 // GetLocalPeerID return the local peer
