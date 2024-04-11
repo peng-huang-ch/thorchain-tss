@@ -7,12 +7,11 @@ import (
 	"testing"
 
 	"github.com/binance-chain/tss-lib/ecdsa/keygen"
+	p2pnet "github.com/libp2p/go-libp2p-testing/net"
 	"github.com/libp2p/go-libp2p/core/peer"
-	tnet "github.com/libp2p/go-libp2p-testing/net"
 	maddr "github.com/multiformats/go-multiaddr"
 	. "gopkg.in/check.v1"
 
-	"gitlab.com/thorchain/tss/go-tss/conversion"
 	"gitlab.com/thorchain/tss/go-tss/p2p"
 )
 
@@ -23,7 +22,7 @@ var _ = Suite(&FileStateMgrTestSuite{})
 func TestPackage(t *testing.T) { TestingT(t) }
 
 func (s *FileStateMgrTestSuite) SetUpTest(c *C) {
-	conversion.SetupBech32Prefix()
+	// conversion.SetupBech32Prefix()
 }
 
 func (s *FileStateMgrTestSuite) TestNewFileStateMgr(c *C) {
@@ -40,9 +39,9 @@ func (s *FileStateMgrTestSuite) TestNewFileStateMgr(c *C) {
 	c.Assert(err, IsNil)
 	fileName, err := fsm.getFilePathName("whatever")
 	c.Assert(err, NotNil)
-	fileName, err = fsm.getFilePathName("thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq")
+	fileName, err = fsm.getFilePathName("024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a")
 	c.Assert(err, IsNil)
-	c.Assert(fileName, Equals, filepath.Join(f, "localstate-thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq.json"))
+	c.Assert(fileName, Equals, filepath.Join(f, "localstate-024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a.json"))
 }
 
 func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
@@ -64,7 +63,7 @@ func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(fsm, NotNil)
 	c.Assert(fsm.SaveLocalState(stateItem), NotNil)
-	stateItem.PubKey = "thorpub1addwnpepqf90u7n3nr2jwsw4t2gzhzqfdlply8dlzv3mdj4dr22uvhe04azq5gac3gq"
+	stateItem.PubKey = "024afe7a7198d52741d55a902b88096fc3f21dbf1323b6caad1a95c65f2faf440a"
 	c.Assert(fsm.SaveLocalState(stateItem), IsNil)
 	filePathName := filepath.Join(f, "localstate-"+stateItem.PubKey+".json")
 	_, err = os.Stat(filePathName)
@@ -77,9 +76,9 @@ func (s *FileStateMgrTestSuite) TestSaveLocalState(c *C) {
 func (s *FileStateMgrTestSuite) TestSaveAddressBook(c *C) {
 	testAddresses := make(map[peer.ID]p2p.AddrList)
 	var t *testing.T
-	id1 := tnet.RandIdentityOrFatal(t)
-	id2 := tnet.RandIdentityOrFatal(t)
-	id3 := tnet.RandIdentityOrFatal(t)
+	id1 := p2pnet.RandIdentityOrFatal(t)
+	id2 := p2pnet.RandIdentityOrFatal(t)
+	id3 := p2pnet.RandIdentityOrFatal(t)
 	mockAddr, err := maddr.NewMultiaddr("/ip4/192.168.3.5/tcp/6668")
 	c.Assert(err, IsNil)
 	peers := []peer.ID{id1.ID(), id2.ID(), id3.ID()}

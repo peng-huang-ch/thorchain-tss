@@ -3,7 +3,6 @@ package tss
 import (
 	"bytes"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
@@ -33,16 +32,16 @@ const (
 
 var (
 	testPubKeys = []string{
-		"thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3",
-		"thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09",
-		"thorpub1addwnpepq2ryyje5zr09lq7gqptjwnxqsy2vcdngvwd6z7yt5yjcnyj8c8cn559xe69",
-		"thorpub1addwnpepqfjcw5l4ay5t00c32mmlky7qrppepxzdlkcwfs2fd5u73qrwna0vzag3y4j",
+		"02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5",
+		"02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6",
+		"0286424b3410de5f83c80057274cc08114cc3668639ba1788ba125899247c1f13a",
+		"02658753f5e928b7bf1156f7fb13c0184390984dfdb0e4c1496d39e8806e9f5ec1",
 	}
 	testPriKeyArr = []string{
-		"MjQ1MDc2MmM4MjU5YjRhZjhhNmFjMmI0ZDBkNzBkOGE1ZTBmNDQ5NGI4NzM4OTYyM2E3MmI0OWMzNmE1ODZhNw==",
-		"YmNiMzA2ODU1NWNjMzk3NDE1OWMwMTM3MDU0NTNjN2YwMzYzZmVhZDE5NmU3NzRhOTMwOWIxN2QyZTQ0MzdkNg==",
-		"ZThiMDAxOTk2MDc4ODk3YWE0YThlMjdkMWY0NjA1MTAwZDgyNDkyYzdhNmMwZWQ3MDBhMWIyMjNmNGMzYjVhYg==",
-		"ZTc2ZjI5OTIwOGVlMDk2N2M3Yzc1MjYyODQ0OGUyMjE3NGJiOGRmNGQyZmVmODg0NzQwNmUzYTk1YmQyODlmNA==",
+		"2450762c8259b4af8a6ac2b4d0d70d8a5e0f4494b87389623a72b49c36a586a7",
+		"bcb3068555cc3974159c013705453c7f0363fead196e774a9309b17d2e4437d6",
+		"e8b001996078897aa4a8e27d1f4605100d82492c7a6c0ed700a1b223f4c3b5ab",
+		"e76f299208ee0967c7c752628448e22174bb8df4d2fef8847406e3a95bd289f4",
 	}
 )
 
@@ -62,7 +61,7 @@ var _ = Suite(&FourNodeTestSuite{})
 // setup four nodes for test
 func (s *FourNodeTestSuite) SetUpTest(c *C) {
 	common.InitLog("info", true, "four_nodes_test")
-	conversion.SetupBech32Prefix()
+	// conversion.SetupBech32Prefix()
 	s.ports = []int{
 		16666, 16667, 16668, 16669,
 	}
@@ -178,14 +177,14 @@ func (s *FourNodeTestSuite) doTestKeygenAndKeySign(c *C, newJoinParty bool) {
 	c.Assert(err, NotNil)
 	c.Assert(resp.Signatures, HasLen, 0)
 	if !newJoinParty {
-		keysignReqWithErr1 := keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, testPubKeys[:1], "0.13.0")
+		keysignReqWithErr1 := keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, testPubKeys[:1], "0.13.0")
 		resp, err = s.servers[0].KeySign(keysignReqWithErr1)
 		c.Assert(err, NotNil)
 		c.Assert(resp.Signatures, HasLen, 0)
 
 	}
 	if !newJoinParty {
-		keysignReqWithErr2 := keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, nil, "0.13.0")
+		keysignReqWithErr2 := keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, nil, "0.13.0")
 		resp, err = s.servers[0].KeySign(keysignReqWithErr2)
 		c.Assert(err, NotNil)
 		c.Assert(resp.Signatures, HasLen, 0)
@@ -199,9 +198,9 @@ func (s *FourNodeTestSuite) doTestKeygenAndKeySign(c *C, newJoinParty bool) {
 			localPubKeys := append([]string{}, testPubKeys...)
 			var keysignReq keysign.Request
 			if newJoinParty {
-				keysignReq = keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, localPubKeys, "0.14.0")
+				keysignReq = keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, localPubKeys, "0.14.0")
 			} else {
-				keysignReq = keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, localPubKeys, "0.13.0")
+				keysignReq = keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, localPubKeys, "0.13.0")
 			}
 			res, err := s.servers[idx].KeySign(keysignReq)
 			c.Assert(err, IsNil)
@@ -220,9 +219,9 @@ func (s *FourNodeTestSuite) doTestKeygenAndKeySign(c *C, newJoinParty bool) {
 			defer wg.Done()
 			var keysignReq keysign.Request
 			if newJoinParty {
-				keysignReq = keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, nil, "0.14.0")
+				keysignReq = keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, nil, "0.14.0")
 			} else {
-				keysignReq = keysign.NewRequest(poolPubKey, []string{base64.StdEncoding.EncodeToString(hash([]byte("helloworld"))), base64.StdEncoding.EncodeToString(hash([]byte("helloworld2")))}, 10, testPubKeys[:3], "0.13.0")
+				keysignReq = keysign.NewRequest(poolPubKey, []string{hex.EncodeToString(hash([]byte("helloworld"))), hex.EncodeToString(hash([]byte("helloworld2")))}, 10, testPubKeys[:3], "0.13.0")
 			}
 			res, err := s.servers[idx].KeySign(keysignReq)
 			c.Assert(err, IsNil)
@@ -267,18 +266,18 @@ func (s *FourNodeTestSuite) doTestFailJoinParty(c *C, newJoinParty bool) {
 		var expectedFailNode string
 		if newJoinParty {
 			c.Assert(item.Blame.BlameNodes, HasLen, 2)
-			expectedFailNode := []string{"thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3", "thorpub1addwnpepq2ryyje5zr09lq7gqptjwnxqsy2vcdngvwd6z7yt5yjcnyj8c8cn559xe69"}
+			expectedFailNode := []string{"02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5", "0286424b3410de5f83c80057274cc08114cc3668639ba1788ba125899247c1f13a"}
 			c.Assert(item.Blame.BlameNodes[0].Pubkey, Equals, expectedFailNode[0])
 			c.Assert(item.Blame.BlameNodes[1].Pubkey, Equals, expectedFailNode[1])
 		} else {
-			expectedFailNode = "thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3"
+			expectedFailNode = "02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5"
 			c.Assert(item.Blame.BlameNodes[0].Pubkey, Equals, expectedFailNode)
 		}
 	}
 }
 
 func (s *FourNodeTestSuite) doTestBlame(c *C, newJoinParty bool) {
-	expectedFailNode := "thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3"
+	expectedFailNode := "02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5"
 	var req keygen.Request
 	if newJoinParty {
 		req = keygen.NewRequest(testPubKeys, 10, "0.14.0")

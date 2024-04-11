@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"math"
 	"math/big"
 	"sort"
 	"strconv"
@@ -14,11 +13,8 @@ import (
 	"github.com/binance-chain/tss-lib/crypto"
 	btss "github.com/binance-chain/tss-lib/tss"
 	"github.com/btcsuite/btcd/btcec"
-	coskey "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	sdk "github.com/cosmos/cosmos-sdk/types/bech32/legacybech32"
 	crypto2 "github.com/libp2p/go-libp2p/core/crypto"
 	"github.com/libp2p/go-libp2p/core/peer"
-	"gitlab.com/thorchain/binance-sdk/common/types"
 
 	"gitlab.com/thorchain/tss/go-tss/messages"
 )
@@ -48,14 +44,7 @@ func PartyIDtoPubKey(party *btss.PartyID) (string, error) {
 		return "", errors.New("invalid party")
 	}
 	partyKeyBytes := party.GetKey()
-	pk := coskey.PubKey{
-		Key: partyKeyBytes,
-	}
-	pubKey, err := sdk.MarshalPubKey(sdk.AccPK, &pk)
-	if err != nil {
-		return "", err
-	}
-	return pubKey, nil
+	return hex.EncodeToString(partyKeyBytes), nil
 }
 
 func AccPubKeysFromPartyIDs(partyIDs []string, partyIDMap map[string]*btss.PartyID) ([]string, error) {
@@ -112,11 +101,11 @@ func GetParties(keys []string, localPartyKey string) ([]*btss.PartyID, *btss.Par
 	var unSortedPartiesID []*btss.PartyID
 	sort.Strings(keys)
 	for idx, item := range keys {
-		pk, err := sdk.UnmarshalPubKey(sdk.AccPK, item)
+		pk, err := hex.DecodeString(item)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to get account pub key address(%s): %w", item, err)
 		}
-		key := new(big.Int).SetBytes(pk.Bytes())
+		key := new(big.Int).SetBytes(pk)
 		// Set up the parameters
 		// Note: The `id` and `moniker` fields are for convenience to allow you to easily track participants.
 		// The `id` should be a unique string representing this party in the network and `moniker` can be anything (even left blank).
@@ -147,10 +136,10 @@ func isOnCurve(x, y *big.Int) bool {
 	return curve.IsOnCurve(x, y)
 }
 
-func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, types.AccAddress, error) {
+func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, string, error) {
 	// we check whether the point is on curve according to Kudelski report
 	if pubKeyPoint == nil || !isOnCurve(pubKeyPoint.X(), pubKeyPoint.Y()) {
-		return "", types.AccAddress{}, errors.New("invalid points")
+		return "", "", errors.New("invalid points")
 	}
 	tssPubKey := btcec.PublicKey{
 		Curve: btcec.S256(),
@@ -158,28 +147,23 @@ func GetTssPubKey(pubKeyPoint *crypto.ECPoint) (string, types.AccAddress, error)
 		Y:     pubKeyPoint.Y(),
 	}
 
-	compressedPubkey := coskey.PubKey{
-		Key: tssPubKey.SerializeCompressed(),
-	}
-
-	pubKey, err := sdk.MarshalPubKey(sdk.AccPK, &compressedPubkey)
-	addr := types.AccAddress(compressedPubkey.Address().Bytes())
-	return pubKey, addr, err
+	compressedPubkey := tssPubKey.SerializeCompressed()
+	return hex.EncodeToString(compressedPubkey), hex.EncodeToString(compressedPubkey), nil
 }
 
 func BytesToHashString(msg []byte) (string, error) {
 	h := sha256.New()
 	_, err := h.Write(msg)
 	if err != nil {
-		return "", fmt.Errorf("fail to caculate sha256 hash: %w", err)
+		return "", fmt.Errorf("fail to calculate sha256 hash: %w", err)
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func GetThreshold(value int) (int, error) {
-	if value < 0 {
+	if value <= 0 {
 		return 0, errors.New("negative input")
 	}
-	threshold := int(math.Ceil(float64(value)*2.0/3.0)) - 1
-	return threshold, nil
+	// threshold := int(math.Ceil(float64(value)*2.0/3.0)) - 1
+	return value, nil
 }

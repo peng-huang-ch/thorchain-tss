@@ -15,13 +15,14 @@ import (
 	"github.com/libp2p/go-libp2p/core/peer"
 	maddr "github.com/multiformats/go-multiaddr"
 
-  "gitlab.com/thorchain/tss/go-tss/conversion"
+	"gitlab.com/thorchain/tss/go-tss/conversion"
 	"gitlab.com/thorchain/tss/go-tss/p2p"
 )
 
 // KeygenLocalState is a structure used to represent the data we saved locally for different keygen
 type KeygenLocalState struct {
 	PubKey          string                    `json:"pub_key"`
+	Threshold       int                       `json:"threshold"`
 	LocalData       keygen.LocalPartySaveData `json:"local_data"`
 	ParticipantKeys []string                  `json:"participant_keys"` // the paticipant of last key gen
 	LocalPartyKey   string                    `json:"local_party_key"`

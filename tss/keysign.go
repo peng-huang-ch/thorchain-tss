@@ -1,7 +1,7 @@
 package tss
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"sort"
@@ -44,38 +44,9 @@ func (t *TssServer) generateSignature(msgID string, msgsToSign [][]byte, req key
 			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
 		}, nil
 	}
-
-	oldJoinParty, err := conversion.VersionLTCheck(req.Version, messages.NEWJOINPARTYVERSION)
-	if err != nil {
-		return keysign.Response{
-			Status: common.Fail,
-			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
-		}, errors.New("fail to parse the version")
-	}
-	// we use the old join party
-	if oldJoinParty {
-		allParticipants = req.SignerPubKeys
-		myPk, err := conversion.GetPubKeyFromPeerID(t.p2pCommunication.GetHost().ID().String())
-		if err != nil {
-			t.logger.Info().Msgf("fail to convert the p2p id(%s) to pubkey, turn to wait for signature", t.p2pCommunication.GetHost().ID().String())
-			return keysign.Response{}, p2p.ErrNotActiveSigner
-		}
-		isSignMember := false
-		for _, el := range allParticipants {
-			if myPk == el {
-				isSignMember = true
-				break
-			}
-		}
-		if !isSignMember {
-			t.logger.Info().Msgf("we(%s) are not the active signer", t.p2pCommunication.GetHost().ID().String())
-			return keysign.Response{}, p2p.ErrNotActiveSigner
-		}
-
-	}
-
+	participants := req.SignerPubKeys
 	joinPartyStartTime := time.Now()
-	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.BlockHeight, allParticipants, threshold, sigChan)
+	onlinePeers, leader, errJoinParty := t.joinParty(msgID, req.Version, req.ConsensusID, participants, threshold, sigChan)
 	joinPartyTime := time.Since(joinPartyStartTime)
 	if errJoinParty != nil {
 		// we received the signature from waiting for signature
@@ -83,7 +54,7 @@ func (t *TssServer) generateSignature(msgID string, msgsToSign [][]byte, req key
 			return keysign.Response{}, errJoinParty
 		}
 		t.tssMetrics.KeysignJoinParty(joinPartyTime, false)
-		// this indicate we are processing the leaderness join party
+		// this indicate we are processing the leaderless join party
 		if leader == "NONE" {
 			if onlinePeers == nil {
 				t.logger.Error().Err(errJoinParty).Msg("error before we start join party")
@@ -189,6 +160,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 		Msg("received keysign request")
 	emptyResp := keysign.Response{}
 	msgID, err := t.requestToMsgId(req)
+	t.logger.Debug().Str("msgID", msgID).Str("ConsensusID", req.ConsensusID).Msg("msgID")
 	if err != nil {
 		return emptyResp, err
 	}
@@ -229,7 +201,7 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 
 	var msgsToSign [][]byte
 	for _, val := range req.Messages {
-		msgToSign, err := base64.StdEncoding.DecodeString(val)
+		msgToSign, err := hex.DecodeString(val)
 		if err != nil {
 			return keysign.Response{}, fmt.Errorf("fail to decode message(%s): %w", strings.Join(req.Messages, ","), err)
 		}
@@ -251,24 +223,16 @@ func (t *TssServer) KeySign(req keysign.Request) (keysign.Response, error) {
 		return true
 	})
 
-	oldJoinParty, err := conversion.VersionLTCheck(req.Version, messages.NEWJOINPARTYVERSION)
-	if err != nil {
-		return keysign.Response{
-			Status: common.Fail,
-			Blame:  blame.NewBlame(blame.InternalError, []blame.Node{}),
-		}, errors.New("fail to parse the version")
-	}
-
-	if len(req.SignerPubKeys) == 0 && oldJoinParty {
+	if len(req.SignerPubKeys) == 0 {
 		return emptyResp, errors.New("empty signer pub keys")
 	}
 
-	threshold, err := conversion.GetThreshold(len(localStateItem.ParticipantKeys))
+	threshold, err := conversion.GetThreshold(localStateItem.Threshold)
 	if err != nil {
 		t.logger.Error().Err(err).Msg("fail to get the threshold")
 		return emptyResp, errors.New("fail to get threshold")
 	}
-	if len(req.SignerPubKeys) <= threshold && oldJoinParty {
+	if len(req.SignerPubKeys) <= threshold {
 		t.logger.Error().Msgf("not enough signers, threshold=%d and signers=%d", threshold, len(req.SignerPubKeys))
 		return emptyResp, errors.New("not enough signers")
 	}
@@ -335,10 +299,10 @@ func (t *TssServer) isPartOfKeysignParty(parties []string) bool {
 func (t *TssServer) batchSignatures(sigs []*tsslibcommon.ECSignature, msgsToSign [][]byte) keysign.Response {
 	var signatures []keysign.Signature
 	for i, sig := range sigs {
-		msg := base64.StdEncoding.EncodeToString(msgsToSign[i])
-		r := base64.StdEncoding.EncodeToString(sig.R)
-		s := base64.StdEncoding.EncodeToString(sig.S)
-		recovery := base64.StdEncoding.EncodeToString(sig.SignatureRecovery)
+		msg := hex.EncodeToString(msgsToSign[i])
+		r := hex.EncodeToString(sig.R)
+		s := hex.EncodeToString(sig.S)
+		recovery := hex.EncodeToString(sig.SignatureRecovery)
 
 		signature := keysign.NewSignature(msg, r, s, recovery)
 		signatures = append(signatures, signature)

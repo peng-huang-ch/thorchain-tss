@@ -2,7 +2,7 @@ package p2p
 
 import (
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/hex"
 
 	"github.com/libp2p/go-libp2p/core/peer"
 	maddr "github.com/multiformats/go-multiaddr"
@@ -40,12 +40,12 @@ func checkExist(a []maddr.Multiaddr, b string) bool {
 
 func (CommunicationTestSuite) TestEstablishP2pCommunication(c *C) {
 	bootstrapPeer := "/ip4/127.0.0.1/tcp/2220/p2p/16Uiu2HAm4TmEzUqy3q3Dv7HvdoSboHk5sFj2FH3npiN5vDbJC6gh"
-	bootstrapPrivKey := "6LABmWB4iXqkqOJ9H0YFEA2CSSx6bA7XAKGyI/TDtas="
+	bootstrapPrivKey := "e8b001996078897aa4a8e27d1f4605100d82492c7a6c0ed700a1b223f4c3b5ab"
 	fakeExternalIP := "11.22.33.44"
 	fakeExternalMultiAddr := "/ip4/11.22.33.44/tcp/2220"
 	validMultiAddr, err := maddr.NewMultiaddr(bootstrapPeer)
 	c.Assert(err, IsNil)
-	privKey, err := base64.StdEncoding.DecodeString(bootstrapPrivKey)
+	privKey, err := hex.DecodeString(bootstrapPrivKey)
 	c.Assert(err, IsNil)
 	comm, err := NewCommunication("commTest", nil, 2220, fakeExternalIP)
 	c.Assert(err, IsNil)

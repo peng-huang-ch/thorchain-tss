@@ -23,6 +23,7 @@ import (
 
 // PartyInfo the information used by tss key gen and key sign
 type PartyInfo struct {
+	Threshold  int
 	PartyMap   *sync.Map
 	PartyIDMap map[string]*btss.PartyID
 }
@@ -39,6 +40,7 @@ type TssCommon struct {
 	broadcastChannel            chan *messages.BroadcastMsgChan
 	TssMsg                      chan *p2p.Message
 	P2PPeersLock                *sync.RWMutex
+	Threshold                   int       // most of tss message are broadcast, we store the peers ID to avoid iterating
 	P2PPeers                    []peer.ID // most of tss message are broadcast, we store the peers ID to avoid iterating
 	msgID                       string
 	privateKey                  tcrypto.PrivKey
@@ -663,7 +665,7 @@ func (t *TssCommon) processVerMsg(broadcastConfirmMsg *messages.BroadcastConfirm
 	localCacheItem.UpdateConfirmList(broadcastConfirmMsg.P2PID, broadcastConfirmMsg.Hash)
 	t.logger.Debug().Msgf("total confirmed parties:%+v", localCacheItem.ConfirmedList)
 
-	threshold, err := conversion.GetThreshold(len(partyInfo.PartyIDMap))
+	threshold, err := conversion.GetThreshold(partyInfo.Threshold)
 	if err != nil {
 		return err
 	}
@@ -793,8 +795,7 @@ func (t *TssCommon) processTSSMsg(wireMsg *messages.WireMessage, msgType message
 		}
 	}
 	localCacheItem.UpdateConfirmList(t.localPeerID, msgHash)
-
-	threshold, err := conversion.GetThreshold(len(partyInfo.PartyIDMap))
+	threshold, err := conversion.GetThreshold(partyInfo.Threshold)
 	if err != nil {
 		return err
 	}

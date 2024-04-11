@@ -1,7 +1,7 @@
 package keysign
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"sync"
@@ -10,8 +10,8 @@ import (
 
 	tsslibcommon "github.com/binance-chain/tss-lib/common"
 	"github.com/binance-chain/tss-lib/ecdsa/signing"
-	"github.com/libp2p/go-libp2p/core/peer"
 	tnet "github.com/libp2p/go-libp2p-testing/net"
+	"github.com/libp2p/go-libp2p/core/peer"
 	mocknet "github.com/libp2p/go-libp2p/p2p/net/mock"
 	"github.com/stretchr/testify/assert"
 
@@ -20,9 +20,9 @@ import (
 )
 
 func TestSignatureNotifierHappyPath(t *testing.T) {
-	poolPubKey := `thorpub1addwnpepq0ul3xt882a6nm6m7uhxj4tk2n82zyu647dyevcs5yumuadn4uamqx7neak`
-	messageToSign := "yhEwrxWuNBGnPT/L7PNnVWg7gFWNzCYTV+GuX3tKRH8="
-	buf, err := base64.StdEncoding.DecodeString(messageToSign)
+	poolPubKey := `03f9f899673abba9ef5bf72e69557654cea1139aaf9a4cb310a139be75b3af3bb0`
+	messageToSign := "ca1130af15ae3411a73d3fcbecf36755683b80558dcc261357e1ae5f7b4a447f"
+	buf, err := hex.DecodeString(messageToSign)
 	assert.Nil(t, err)
 	messageID, err := common.MsgToHashString(buf)
 	assert.Nil(t, err)

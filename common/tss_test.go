@@ -2,7 +2,6 @@ package common
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -27,10 +26,10 @@ import (
 )
 
 var (
-	testBlamePrivKey = "YmNiMzA2ODU1NWNjMzk3NDE1OWMwMTM3MDU0NTNjN2YwMzYzZmVhZDE5NmU3NzRhOTMwOWIxN2QyZTQ0MzdkNg=="
-	testSenderPubKey = "thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09"
-	testPubKeys      = [...]string{"thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3", "thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09", "thorpub1addwnpepq2ryyje5zr09lq7gqptjwnxqsy2vcdngvwd6z7yt5yjcnyj8c8cn559xe69", "thorpub1addwnpepqfjcw5l4ay5t00c32mmlky7qrppepxzdlkcwfs2fd5u73qrwna0vzag3y4j"}
-	testBlamePubKeys = []string{"thorpub1addwnpepqtr5p8tllhp4xaxmu77zhqen24pmrdlnekzevshaqkyzdqljm6rejnnt02t", "thorpub1addwnpepqtspqyy6gk22u37ztra4hq3hdakc0w0k60sfy849mlml2vrpfr0wvm6uz09", "thorpub1addwnpepqga4nded5hhnwsrwmrns803w7vu9mffp9r6dz4l6smaww2l5useuq6vkttg", "thorpub1addwnpepq28hfdpu3rdgvj8skzhlm8hyt5nlwwc8pjrzvn253j86e4dujj6jsmuf25q", "thorpub1addwnpepqfuq0xc67052h288r6flp67l0ny9mg6u3sxhsrlukyfg0fe9j6q36ysd33y", "thorpub1addwnpepq0jszts80udfl4pkfk6cp93647yl6fhu6pk486uwjdz2sf94qvu0kw0t6ug", "thorpub1addwnpepqw6mmffk69n5taaqhq3wsc8mvdpsrdnx960kujeh4jwm9lj8nuyux9hz5e4", "thorpub1addwnpepq0pdhm2jatzg2vy6fyw89vs6q374zayqd5498wn8ww780grq256ygq7hhjt", "thorpub1addwnpepqggwmlgd8u9t2sx4a0styqwhzrvdhpvdww7sqwnweyrh25rjwwm9q65kx9s", "thorpub1addwnpepqtssltyjvms8pa7k4yg85lnrjqtvvr2ecr36rhm7pa4ztf55tnuzzgvegpk"}
+	testBlamePrivKey = "bcb3068555cc3974159c013705453c7f0363fead196e774a9309b17d2e4437d6"
+	testSenderPubKey = "02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6"
+	testPubKeys      = [...]string{"02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5", "02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6", "0286424b3410de5f83c80057274cc08114cc3668639ba1788ba125899247c1f13a", "02658753f5e928b7bf1156f7fb13c0184390984dfdb0e4c1496d39e8806e9f5ec1"}
+	testBlamePubKeys = []string{"02c7409d7ffdc35374dbe7bc2b83335543b1b7f3cd859642fd05882683f2de8799", "02e010109a4594ae47c258fb5b82376f6d87b9f6d3e0921ea5dff7f5306148dee6", "023b59b72da5ef37406ed8e703be2ef3385da52128f4d157fa86fae72bf4e433c0", "028f74b43c88da8648f0b0affd9ee45d27f73b070c86264d548c8facd5bc94b528", "0278079b1af3e8aba8e71e93f0ebdf7cc85da35c8c0d780ffcb11287a72596811d", "03e5012e077f1a9fd4364db580963aaf89fd26fcd06d53eb8e9344a824b50338fb", "03b5bda536d16745f7a0b822e860fb634301b6662e9f6e4b37ac9db2fe479f09c3", "03c2dbed52eac485309a491c72b21a047d5174806d2a53ba6773bc77a060553444", "0210edfd0d3f0ab540d5ebe0b201d710d8db858d73bd003a6ec90775507273b650", "02e10fac9266e070f7d6a9107a7e639016c60d59c0e3a1df7e0f6a25a6945cf821"}
 )
 
 func TestPackage(t *testing.T) { TestingT(t) }
@@ -43,8 +42,7 @@ var _ = Suite(&TssTestSuite{})
 
 func (t *TssTestSuite) SetUpSuite(c *C) {
 	InitLog("info", true, "tss_common_test")
-	conversion.SetupBech32Prefix()
-	priHexBytes, err := base64.StdEncoding.DecodeString(testBlamePrivKey)
+	priHexBytes, err := hex.DecodeString(testBlamePrivKey)
 	c.Assert(err, IsNil)
 	rawBytes, err := hex.DecodeString(string(priHexBytes))
 	c.Assert(err, IsNil)
@@ -204,6 +202,7 @@ func setupProcessVerMsgEnv(c *C, privKey tcrypto.PrivKey, keyPool []string, part
 	partyMap := new(sync.Map)
 	partyMap.Store("tester", keyGenParty)
 	tssCommonStruct.SetPartyInfo(&PartyInfo{
+		Threshold:  1,
 		PartyMap:   partyMap,
 		PartyIDMap: partyIDMap,
 	})
@@ -404,7 +403,7 @@ func (t *TssTestSuite) TestProcessVerMessage(c *C) {
 }
 
 func (t *TssTestSuite) TestTssCommon(c *C) {
-	pk, err := sdk.UnmarshalPubKey(sdk.AccPK, "thorpub1addwnpepqtdklw8tf3anjz7nn5fly3uvq2e67w2apn560s4smmrt9e3x52nt2svmmu3")
+	pk, err := sdk.UnmarshalPubKey(sdk.AccPK, "02db6fb8eb4c7b390bd39d13f2478c02b3af395d0ce9a7c2b0dec6b2e626a2a6b5")
 	c.Assert(err, IsNil)
 	peerID, err := conversion.GetPeerIDFromSecp256PubKey(pk.Bytes())
 	c.Assert(err, IsNil)
